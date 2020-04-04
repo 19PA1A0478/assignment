@@ -1,0 +1,335 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "Untitled",
+      "provenance": [],
+      "authorship_tag": "ABX9TyNAc+VQeEDPIv46nb+MMHCv",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/19PA1A0478/assignment/blob/master/svm%2Ctrian-test-split\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "xabrRnDLH6N0",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "import pandas as pd\n",
+        "import numpy as np\n",
+        "from sklearn.linear_model import LogisticRegression\n",
+        "from sklearn.metrics import confusion_matrix,classification_report\n",
+        "from sklearn.svm import SVC\n",
+        "from sklearn.model_selection import train_test_split"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "zH-aK5phH_OW",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 235
+        },
+        "outputId": "c2726a98-b9ff-4064-a357-e52b25bb3f81"
+      },
+      "source": [
+        "data=pd.read_csv('Iris.csv')\n",
+        "data.head(6)"
+      ],
+      "execution_count": 2,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/html": [
+              "<div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>Id</th>\n",
+              "      <th>SepalLengthCm</th>\n",
+              "      <th>SepalWidthCm</th>\n",
+              "      <th>PetalLengthCm</th>\n",
+              "      <th>PetalWidthCm</th>\n",
+              "      <th>Species</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>0</th>\n",
+              "      <td>1</td>\n",
+              "      <td>5.1</td>\n",
+              "      <td>3.5</td>\n",
+              "      <td>1.4</td>\n",
+              "      <td>0.2</td>\n",
+              "      <td>Iris-setosa</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>2</td>\n",
+              "      <td>4.9</td>\n",
+              "      <td>3.0</td>\n",
+              "      <td>1.4</td>\n",
+              "      <td>0.2</td>\n",
+              "      <td>Iris-setosa</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>2</th>\n",
+              "      <td>3</td>\n",
+              "      <td>4.7</td>\n",
+              "      <td>3.2</td>\n",
+              "      <td>1.3</td>\n",
+              "      <td>0.2</td>\n",
+              "      <td>Iris-setosa</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>3</th>\n",
+              "      <td>4</td>\n",
+              "      <td>4.6</td>\n",
+              "      <td>3.1</td>\n",
+              "      <td>1.5</td>\n",
+              "      <td>0.2</td>\n",
+              "      <td>Iris-setosa</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>4</th>\n",
+              "      <td>5</td>\n",
+              "      <td>5.0</td>\n",
+              "      <td>3.6</td>\n",
+              "      <td>1.4</td>\n",
+              "      <td>0.2</td>\n",
+              "      <td>Iris-setosa</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>5</th>\n",
+              "      <td>6</td>\n",
+              "      <td>5.4</td>\n",
+              "      <td>3.9</td>\n",
+              "      <td>1.7</td>\n",
+              "      <td>0.4</td>\n",
+              "      <td>Iris-setosa</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "</div>"
+            ],
+            "text/plain": [
+              "   Id  SepalLengthCm  SepalWidthCm  PetalLengthCm  PetalWidthCm      Species\n",
+              "0   1            5.1           3.5            1.4           0.2  Iris-setosa\n",
+              "1   2            4.9           3.0            1.4           0.2  Iris-setosa\n",
+              "2   3            4.7           3.2            1.3           0.2  Iris-setosa\n",
+              "3   4            4.6           3.1            1.5           0.2  Iris-setosa\n",
+              "4   5            5.0           3.6            1.4           0.2  Iris-setosa\n",
+              "5   6            5.4           3.9            1.7           0.4  Iris-setosa"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 2
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "XGKuCtonH_yd",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "x=data.drop('Species',axis=1)\n",
+        "y=data['Species']"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "_wpBbizXIPow",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "X_tr̥ain, X_test, y_train, y_test=train_test_split(x,y,test_size=0.2,random_state=42)"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "7znEAseYI2gQ",
+        "colab_type": "text"
+      },
+      "source": [
+        "1.polynomial kernal"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "hKJ7LaxRIY5m",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "model= SVC(kernel='poly',)\n",
+        "model.fit(X_tr̥ain,y_train)\n",
+        "y_pred=model.predict(X_test)"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "Gt9b1tIYIcz2",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 238
+        },
+        "outputId": "7b00f8c4-49b4-4192-c869-f51041aa7722"
+      },
+      "source": [
+        "print(confusion_matrix(y_test,y_pred))\n",
+        "print(classification_report(y_test,y_pred))"
+      ],
+      "execution_count": 7,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "[[10  0  0]\n",
+            " [ 0  9  0]\n",
+            " [ 0  0 11]]\n",
+            "                 precision    recall  f1-score   support\n",
+            "\n",
+            "    Iris-setosa       1.00      1.00      1.00        10\n",
+            "Iris-versicolor       1.00      1.00      1.00         9\n",
+            " Iris-virginica       1.00      1.00      1.00        11\n",
+            "\n",
+            "       accuracy                           1.00        30\n",
+            "      macro avg       1.00      1.00      1.00        30\n",
+            "   weighted avg       1.00      1.00      1.00        30\n",
+            "\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "CEry39dLJIpL",
+        "colab_type": "text"
+      },
+      "source": [
+        "2.sigmoid kernal"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "N0cUt_WrIj-e",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "model= SVC(kernel='sigmoid',)\n",
+        "model.fit(X_tr̥ain,y_train)\n",
+        "y_pred=model.predict(X_test)"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "i_BT46n2IsrX",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 238
+        },
+        "outputId": "70a0663b-e350-42b2-8c21-b1aeeafdc944"
+      },
+      "source": [
+        "print(confusion_matrix(y_test, y_pred))\n",
+        "print(classification_report(y_test, y_pred))"
+      ],
+      "execution_count": 9,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "[[ 4  0  6]\n",
+            " [ 0  0  9]\n",
+            " [ 0 11  0]]\n",
+            "                 precision    recall  f1-score   support\n",
+            "\n",
+            "    Iris-setosa       1.00      0.40      0.57        10\n",
+            "Iris-versicolor       0.00      0.00      0.00         9\n",
+            " Iris-virginica       0.00      0.00      0.00        11\n",
+            "\n",
+            "       accuracy                           0.13        30\n",
+            "      macro avg       0.33      0.13      0.19        30\n",
+            "   weighted avg       0.33      0.13      0.19        30\n",
+            "\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "sIX2NjglJNT-",
+        "colab_type": "text"
+      },
+      "source": [
+        "CONCLUSION:\n",
+        "If we compare the performance of the different types of kernels we can clearly see that the sigmoid kernel performs the worst. This is due to the reason that sigmoid function returns two values, 0 and 1, therefore it is more suitable for binary classification problems.\n",
+        "         Amongst the sigmoid kernel and polynomial kernel, we can see that polynomial kernel achieved a perfect 100% prediction rate .\n",
+        "K.B.N.S.Sumanjali-19PA1A0478"
+      ]
+    }
+  ]
+}
